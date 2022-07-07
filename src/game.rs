@@ -9,6 +9,8 @@ const TEXT_AREA_HEIGHT: f64 = 5.0;
 const GAME_SPEED: f64 = 0.02;
 const RESTART_TIME: f64 = 1.0;
 
+
+
 pub struct Game {
     player: Paddle,
     enemy: Paddle,
@@ -24,6 +26,10 @@ pub struct Game {
 
     active_key: Option<Key>,
     score: i32,
+
+    ball_owner: String,
+    BALL_COLOR: Color,
+    BALL_COLOR2: Color,
 }
 
 impl Game {
@@ -40,6 +46,9 @@ impl Game {
             game_over: false,
             active_key: None,
             score: 0,
+            ball_owner: ("Enemy").to_string(),
+            BALL_COLOR: [1.0, 1.0, 1.0, 1.0],
+            BALL_COLOR2: [0.0, 0.5, 0.8, 1.0],
         }
     }
 
@@ -69,6 +78,7 @@ impl Game {
         draw_rectangle(BORDER_COLOR, (self.width - 1) as f64, TEXT_AREA_HEIGHT, 1, self.height, con, g,);
 
         draw_text(std::format!("SCORE: {}", self.score).as_str(), 5.0, con, g, cache,);
+        draw_text(std::format!("BALL HIT BY: {}", self.ball_owner).as_str(), 20.0, con, g, cache,);
 
         if self.game_over {
             draw_rectangle( GAMEOVER_COLOR, 0.0, TEXT_AREA_HEIGHT, self.width, self.height, con, g,);
@@ -101,6 +111,7 @@ impl Game {
             self.game_over = true;
             if next_x > self.player.get_position_x() + 1_f64 {
                 // GAME OVER
+
                 self.game_over = true;
             } else {
                 self.ball.set_velocity(100.0, 0.0);
@@ -129,6 +140,7 @@ impl Game {
             let d = paddle_center as f64 - next_y;
             self.ball.flip_velocity_x();
             self.ball.increase_y(d * -20.0);
+            self.ball_owner = String::from("Player");
         }
 
         // AI collision
@@ -140,6 +152,8 @@ impl Game {
             let d = paddle_center as f64 - next_y;
             self.ball.flip_velocity_x();
             self.ball.increase_y(d * -20.0);
+            self.ball_owner = String::from("Enemy");
+
         }
 
         self.ball.set_position(next_x, next_y);
@@ -183,6 +197,12 @@ impl Game {
     }
 
     fn restart(&mut self) {
+        if self.ball_owner == "Enemy" && self.score > 0{
+            self.score -= 1;
+        }
+        
+        self.ball_owner = ("Enemy").to_string();
+
         self.waiting_time = 0.0;
         self.ball.set_velocity(100.0, 0.0);
         self.ball.set_position(6.0, (self.height / 2) as f64);
