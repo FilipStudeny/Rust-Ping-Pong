@@ -197,6 +197,7 @@ impl Game {
     }
 
     fn restart(&mut self) {
+        //HELLOOOOO
         if self.ball_owner == "Enemy" && self.score > 0{
             self.score -= 1;
         }
